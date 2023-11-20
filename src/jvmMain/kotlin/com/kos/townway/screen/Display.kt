@@ -47,11 +47,16 @@ fun Display() {
                     this.translate(c.width + posX.value, c.height + posY.value) {
                         val p = Path()
                         line(p, Vec2(60.0, 70.0), Vec2(100.0, 200.0))
+                        line (p, Vec2(60.0, 70.0), Vec2(200.0, 300.0))
+                        line (p, Vec2(60.0, 70.0), Vec2(300.0, 400.0))
                         drawPath(p, roadColor, style = roadStyle)
 
                         drawRect(hauseColor, Offset(10f, 20f), Size(50f, 50f))
 
                         drawRect(hauseColor, Offset(100f, 200f), Size(50f, 50f))
+                        drawRect(hauseColor, Offset(200f, 300f), Size(50f, 50f))
+                        drawRect(hauseColor, Offset(300f, 400f), Size(50f, 50f))
+
                     }
                 }
             }
