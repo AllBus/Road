@@ -3,7 +3,6 @@ package com.kos.townway.screen
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.onDrag
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -14,16 +13,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.*
-import com.kos.townway.math.GameMath.calculateDistance
-import com.kos.townway.model.CrossRoad
-import com.kos.townway.model.GameData
-import com.kos.townway.model.House
-import com.kos.townway.model.Road
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.*
+import androidx.compose.ui.unit.sp
+import com.kos.townway.model.*
 import vectors.Vec2
 import vectors.toOffset
 
@@ -36,6 +33,8 @@ fun Display() {
     val displayScale = rememberSaveable("DisplayScale") { mutableStateOf(1f) }
 
     val gameData = remember { mutableStateOf(createGameData()) }
+    val fontResolver = LocalFontFamilyResolver.current
+    val textMeasurer = rememberTextMeasurer()
 
     Canvas(modifier = Modifier.fillMaxSize().clipToBounds().onDrag(
         onDrag = { offset ->
@@ -48,54 +47,65 @@ fun Display() {
 
             this.translate(posX.value, posY.value) {
                 this.scale(scale = displayScale.value) {
-                    this.translate(c.width + posX.value, c.height + posY.value) {
 
+                        DrawGrid(this, gameData, textMeasurer, posX, posY)
                         DrawRoads(this, gameData)
                         DrawCrosses(this, gameData)
                         DrawHouses(this, gameData)
-                    }
+                        DrawSvetoforSignal(this, gameData)
+
                 }
             }
 
         })
 }
 
-fun createGameData(): GameData {
+fun DrawGrid(
+    drawScope: DrawScope,
+    gameData: MutableState<GameData>,
+    textMeasurer: TextMeasurer,
+    posX: MutableState<Float>,
+    posY: MutableState<Float>
+) {
 
-    val game = GameData()
+    val gridColor: Color = R.color.gridColor
+    val gridStyle: DrawStyle = Stroke(width = R.dimen.gridWidth)
 
-    val h1 = House(1, "1", Vec2(10.0, 20.0))
-    val h2 = House(2, "2", Vec2(100.0, 200.0))
-    val h3 = House(3, "3", Vec2(200.0, 300.0))
-    val h4 = House(4, "4", Vec2(300.0, 400.0))
 
-    val c1 = CrossRoad(100, "1", Vec2(280.0, 30.0))
+    val p = Path()
+    (-1000..1000 step 100).forEach { y ->
+        line(p, Vec2 (-1000.0, y.toDouble()),Vec2( 1000.0, y.toDouble()), )
+        drawScope.drawText(
+            textMeasurer.measure(AnnotatedString("${y}"),
+                style = TextStyle(fontSize =14.sp),
+            ),
+            topLeft = Offset(-posX.value, y.toFloat())
+        )
+    }
+       (-1000..1000 step 100).forEach { x ->
 
-    val r12 = Road(12, "12",h1 , h2, calculateDistance(h1,h2))
-    val r13 = Road(13, "13",h1 , h3, calculateDistance(h1,h3))
-    val r14 = Road(14, "14",h1 , h4, calculateDistance(h1,h4))
-
-    val r101 = Road(101, "101",c1 , h1, calculateDistance(c1,h1))
-    val r103 = Road(103, "103",c1 , h3, calculateDistance(c1,h3))
-    val r104 = Road(104, "104",c1 , h4, calculateDistance(c1,h4))
-
-    game.houses = listOf(
-        h1,
-        h2,
-        h3,
-        h4,
+        line(p, Vec2 (x.toDouble(),-1000.0),Vec2( x.toDouble(),1000.0), )
+drawScope.drawText(
+    textMeasurer.measure(AnnotatedString("${x}"),
+        style = TextStyle(fontSize =14.sp),
+        ),
+    topLeft = Offset(x.toFloat(), -posY.value)
     )
 
-    game.roads = listOf(
-        r12,
-        r13,
-        r14,
-        r101,
-        r103,
-        r104,
-    )
+    }
+    drawScope.drawPath(p, gridColor, style = gridStyle)
+}
 
-    return game
+fun DrawSvetoforSignal(drawScope: DrawScope, gameData: MutableState<GameData>) {
+    val svetoforSignalColor: Color = R.color.svetoforSignal
+
+    gameData.value.svetoforSignal.forEach { svetoforSignal ->
+        drawScope.drawCircle(
+            color = svetoforSignalColor,
+            center = svetoforSignal.crossRoad.coord.toOffset()-Offset(0f, 0f),
+            radius = 20f,
+            )
+    }
 }
 
 fun DrawRoads(drawScope: DrawScope, gameData: MutableState<GameData>) {

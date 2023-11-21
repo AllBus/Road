@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color
 
 object R {
     object color{
+        val gridColor = Color (0xFF404040)
+        val svetoforSignal = Color (0xFF79B207)
         val haus = Color(0xFFFF00FF)
         val street = Color(0xFF00C44E)
         val road = Color.Gray
@@ -16,5 +18,6 @@ object R {
 
     object dimen {
         val roadWidth = 3f
+        val gridWidth = 1f
     }
 }

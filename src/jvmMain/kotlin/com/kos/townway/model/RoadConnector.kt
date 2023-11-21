@@ -4,4 +4,6 @@ import vectors.Vec2
 
 interface RoadConnector {
     val coord: Vec2
+    val id: Int
+
 }
