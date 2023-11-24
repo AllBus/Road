@@ -8,16 +8,16 @@ fun createGameData(): GameData {
 
     val game = GameData()
 
-    val h1  =  House(1, "1", Parkovka (radius = 50.0, spotNumber = 12), Vec2(-300.0, 0.0 ))
-    val h2  =  House(2, "2", Parkovka (radius = 50.0, spotNumber = 12), Vec2(-300.0, 100.0))
-    val h3  =  House(3, "3", Parkovka (radius = 50.0, spotNumber = 12), Vec2(-300.0, 200.0))
-    val h4  =  House(4, "4", Parkovka (radius = 50.0, spotNumber = 12), Vec2(-300.0, 300.0))
-    val h5  =  House (5, "5", Parkovka (radius = 50.0, spotNumber = 12), Vec2(0.0, -300.0))
-    val h6  =  House (6, "6", Parkovka (radius = 50.0, spotNumber = 12), Vec2(0.0, 300.0))
-    val h7  =  House (7, "7", Parkovka (radius = 50.0, spotNumber = 12), Vec2(300.0, 0.0))
-    val h8  =  House (8, "8", Parkovka (radius = 50.0, spotNumber = 12), Vec2(300.0, -300.0))
-    val h9  =  House (9, "9", Parkovka (radius = 50.0, spotNumber = 12), Vec2(300.0, 300.0))
-    val h10  = House (10, "10", Parkovka (radius = 50.0, spotNumber = 12), Vec2(-300.0, -300.0))
+    val h1  =  House(1, "1", Parkovka (radius = 50.0, spotNumber = 1), Vec2(-300.0, 0.0 ), Vec2(50, 50), 25f)
+    val h2  =  House(2, "2", Parkovka (radius = 50.0, spotNumber = 2), Vec2(-300.0, 100.0), Vec2(50, 50))
+    val h3  =  House(3, "3", Parkovka (radius = 50.0, spotNumber = 6), Vec2(-300.0, 200.0), Vec2(30, 30))
+    val h4  =  House(4, "4", Parkovka (radius = 50.0, spotNumber = 40), Vec2(-300.0, 300.0), Vec2(50, 50))
+    val h5  =  House (5, "5", Parkovka (radius = 50.0, spotNumber = 25), Vec2(0.0, -300.0), Vec2(50, 50))
+    val h6  =  House (6, "6", Parkovka (radius = 50.0, spotNumber = 18), Vec2(0.0, 300.0), Vec2(50, 50), 45f)
+    val h7  =  House (7, "7", Parkovka (radius = 50.0, spotNumber = 17), Vec2(300.0, 0.0), Vec2(50, 50))
+    val h8  =  House (8, "8", Parkovka (radius = 100.0, spotNumber = 11), Vec2(300.0, -300.0), Vec2(50, 150), 70f)
+    val h9  =  House (9, "9", Parkovka (radius = 80.0, spotNumber = 12), Vec2(300.0, 300.0), Vec2(50, 90))
+    val h10  = House (10, "10", Parkovka (radius = 90.0, spotNumber = 13), Vec2(-300.0, -300.0), Vec2(80, 80))
 
     val c1 = CrossRoad(100, "1", Vec2(0.0, 0.0))
 
@@ -31,7 +31,9 @@ fun createGameData(): GameData {
     val r105 = Road(105, "105", c1, h5, GameMath.calculateDistance(c1, h5))
     val r106 = Road(106, "106", c1, h6, GameMath.calculateDistance(c1, h6))
     val r107 = Road(107, "107", c1, h7, GameMath.calculateDistance(c1, h7))
-val r108 = createRoad(begin = h7, end = h4)
+    val r508 = createRoad(begin = h5, end = h8)
+    val r108 = createRoad(begin = h7, end = h4)
+
     val svetoforSignal = SvetoforSignal(
         2,
         "", 101,
@@ -53,7 +55,13 @@ val r108 = createRoad(begin = h7, end = h4)
         h9,
         h10
     )
-    game.svetoforSignal = listOf(svetoforSignal)
+    game.svetoforSignal = listOf(
+        svetoforSignal
+    )
+
+    game.crosses = listOf(
+        c1
+    )
 
     game.roads = listOf(
         r12,
@@ -63,7 +71,8 @@ val r108 = createRoad(begin = h7, end = h4)
         r105,
         r106,
         r107,
-        r108
+        r108,
+        r508
     )
 
     return game

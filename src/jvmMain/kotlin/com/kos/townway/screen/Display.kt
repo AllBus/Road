@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import com.kos.townway.model.*
 import vectors.Vec2
 import vectors.toOffset
+import vectors.toSize
+import kotlin.math.min
 
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
@@ -48,11 +50,11 @@ fun Display() {
             this.translate(posX.value, posY.value) {
                 this.scale(scale = displayScale.value) {
 
-                        DrawGrid(this, gameData, textMeasurer, posX, posY)
-                        DrawRoads(this, gameData)
-                        DrawCrosses(this, gameData)
-                        DrawHouses(this, gameData)
-                        DrawSvetoforSignal(this, gameData)
+                    drawGrid(this, gameData, textMeasurer, posX, posY, displayScale)
+                    drawRoads(this, gameData)
+                    drawCrosses(this, gameData)
+                    drawHouses(this, gameData)
+                    drawSvetoforSignal(this, gameData)
 
                 }
             }
@@ -60,55 +62,56 @@ fun Display() {
         })
 }
 
-fun DrawGrid(
+fun drawGrid(
     drawScope: DrawScope,
     gameData: MutableState<GameData>,
     textMeasurer: TextMeasurer,
     posX: MutableState<Float>,
-    posY: MutableState<Float>
+    posY: MutableState<Float>,
+    displayScale: MutableState<Float>,
 ) {
 
     val gridColor: Color = R.color.gridColor
     val gridStyle: DrawStyle = Stroke(width = R.dimen.gridWidth)
 
-
     val p = Path()
     (-1000..1000 step 100).forEach { y ->
-        line(p, Vec2 (-1000.0, y.toDouble()),Vec2( 1000.0, y.toDouble()), )
+        line(p, Vec2(-1000.0, y.toDouble()), Vec2(1000.0, y.toDouble()))
         drawScope.drawText(
-            textMeasurer.measure(AnnotatedString("${y}"),
-                style = TextStyle(fontSize =14.sp),
+            textMeasurer.measure(
+                AnnotatedString("${y}"),
+                style = TextStyle(fontSize = 14.sp),
             ),
             topLeft = Offset(-posX.value, y.toFloat())
         )
     }
-       (-1000..1000 step 100).forEach { x ->
 
-        line(p, Vec2 (x.toDouble(),-1000.0),Vec2( x.toDouble(),1000.0), )
-drawScope.drawText(
-    textMeasurer.measure(AnnotatedString("${x}"),
-        style = TextStyle(fontSize =14.sp),
-        ),
-    topLeft = Offset(x.toFloat(), -posY.value)
-    )
-
+    (-1000..1000 step 100).forEach { x ->
+        line(p, Vec2(x.toDouble(), -1000.0), Vec2(x.toDouble(), 1000.0))
+        drawScope.drawText(
+            textMeasurer.measure(
+                AnnotatedString("${x}"),
+                style = TextStyle(fontSize = 14.sp),
+            ),
+            topLeft = Offset(x.toFloat(), -posY.value)
+        )
     }
     drawScope.drawPath(p, gridColor, style = gridStyle)
 }
 
-fun DrawSvetoforSignal(drawScope: DrawScope, gameData: MutableState<GameData>) {
+fun drawSvetoforSignal(drawScope: DrawScope, gameData: MutableState<GameData>) {
     val svetoforSignalColor: Color = R.color.svetoforSignal
 
     gameData.value.svetoforSignal.forEach { svetoforSignal ->
         drawScope.drawCircle(
             color = svetoforSignalColor,
-            center = svetoforSignal.crossRoad.coord.toOffset()-Offset(0f, 0f),
+            center = svetoforSignal.crossRoad.coord.toOffset() - Offset(0f, 0f),
             radius = 20f,
-            )
+        )
     }
 }
 
-fun DrawRoads(drawScope: DrawScope, gameData: MutableState<GameData>) {
+fun drawRoads(drawScope: DrawScope, gameData: MutableState<GameData>) {
     val roadColor: Color = R.color.road
     val roadStyle: DrawStyle = Stroke(width = R.dimen.roadWidth)
 
@@ -120,7 +123,7 @@ fun DrawRoads(drawScope: DrawScope, gameData: MutableState<GameData>) {
     drawScope.drawPath(p, roadColor, style = roadStyle)
 }
 
-fun DrawCrosses(drawScope: DrawScope, gameData: MutableState<GameData>) {
+fun drawCrosses(drawScope: DrawScope, gameData: MutableState<GameData>) {
     val roadColor: Color = R.color.road
     val roadStyle: DrawStyle = Fill
 
@@ -129,35 +132,67 @@ fun DrawCrosses(drawScope: DrawScope, gameData: MutableState<GameData>) {
     }
 }
 
-fun DrawHouses(drawScope: DrawScope, gameData: MutableState<GameData>){
+fun drawHouses(drawScope: DrawScope, gameData: MutableState<GameData>) {
     val houseColor: Color = R.color.haus
+    val styleHouse: DrawStyle = Fill
+
+    drawParking(drawScope, gameData)
+
+    gameData.value.houses.forEach { house ->
+        drawScope.rotate(house.rotate, house.coord.toOffset()) {
+            drawScope.drawRect(
+                houseColor,
+                (house.coord-house.size / 2.0).toOffset(),
+                house.size.toSize()
+            )
+        }
+    }
+
+}
+
+private fun drawParking(
+    drawScope: DrawScope,
+    gameData: MutableState<GameData>,
+
+) {
     val parkovkaColor: Color = R.color.parkovka
 
-    val styleHause: DrawStyle = Fill
+    gameData.value.houses.forEach { houses ->
+        drawScope.rotate(houses.rotate, houses.coord.toOffset()) {
 
-gameData.value.houses.forEach {houses ->
-    drawScope.drawCircle(parkovkaColor, houses.parkovka.radius.toFloat(),houses.coord.toOffset())
-    (1..houses.parkovka.spotNumber).forEach{index->
-        val a = index%(houses.parkovka.spotNumber/4)
-        val b = index%4
-        val d =when (b){
-            0 ->Vec2(-1.0, 0.0)
-            1 ->Vec2(0,-1)
-            2 ->Vec2 (1,0)
-            3 ->Vec2(0,1)
-            else -> Vec2(0,0)
+            drawScope.drawCircle(parkovkaColor, houses.parkovka.radius.toFloat(), houses.coord.toOffset())
+            val spotInSide = (houses.parkovka.spotNumber - 1) / 4 + 1
+            val spotSize = min((houses.parkovka.radius / spotInSide).toFloat(), R.dimen.maxParkingSlotSize)
+
+            (1..houses.parkovka.spotNumber).forEach { index ->
+                val position = parkingSpotPosition(index, spotInSide, houses, spotSize)
+
+                drawScope.drawRect(
+                    R.color.parking,
+                    position.toOffset(),
+                    Size(spotSize, spotSize)
+                )
+            }
         }
-
-        drawScope.drawRect(R.color.svetoforSignal, houses.coord.toOffset()-Offset(25f, 25f)+
-                (d*a.toDouble()*houses.parkovka.radius).toOffset() , Size(6f, 6f))
-
     }
 }
-    gameData.value.houses.forEach { houses ->
-        drawScope.drawRect(houseColor, houses.coord.toOffset()-Offset(25f, 25f), Size(50f, 50f))
+
+fun parkingSpotPosition(
+    index: Int,
+    spotInSide: Int,
+    house: House,
+    spotSize: Float
+): Vec2 {
+    val a = (index % spotInSide) + 1
+    val d = when (index / spotInSide) {
+        0 -> Vec2(-1, 0)
+        1 -> Vec2(0, -1)
+        2 -> Vec2(1, 0)
+        3 -> Vec2(0, 1)
+        else -> Vec2(0, 0)
     }
-
-
+    return house.coord - Vec2(spotSize / 2.0, spotSize / 2.0) +
+            (d * (house.size.max() / 2 + spotSize) + (d.r90 * (a - spotInSide / 2.0 - 0.5) * spotSize * 1.1))
 }
 
 private fun line(p: Path, start: Vec2, end: Vec2) {

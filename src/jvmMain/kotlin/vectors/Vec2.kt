@@ -13,11 +13,22 @@ data class Vec2(@JvmField val x: Double,@JvmField val y: Double) {
         return Vec2(x - other.x, y - other.y)
     }
 
+    operator fun times(k: Int): Vec2 {
+        return Vec2(x * k, y * k)
+    }
     operator fun times(k: Double): Vec2 {
         return Vec2(x * k, y * k)
     }
 
+    operator fun times(k: Float): Vec2 {
+        return Vec2(x * k, y * k)
+    }
+
     operator fun div(k: Double): Vec2 {
+        return Vec2(x / k, y / k)
+    }
+
+    operator fun div(k: Float): Vec2 {
         return Vec2(x / k, y / k)
     }
 
@@ -29,6 +40,16 @@ data class Vec2(@JvmField val x: Double,@JvmField val y: Double) {
         cos(angle) * x - sin(angle) * y,
         cos(angle) * y + sin(angle) * x
     )
+
+    val t: Vec2 get(){
+        return Vec2(y, x)
+    }
+
+    val r90: Vec2 get() {
+        return Vec2(y, -x)
+    }
+
+    fun max(): Double = max(x, y)
 
     override fun toString(): String {
         return "($x $y)"

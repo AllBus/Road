@@ -7,6 +7,7 @@ object R {
         val parkovka = Color (0xFF808080)
         val gridColor = Color (0xFF404040)
         val svetoforSignal = Color (0xFF79B207)
+        val parking = Color (0xFFCACACA)
         val haus = Color(0xFFFF00FF)
         val street = Color(0xFF00C44E)
         val road = Color.Gray
@@ -18,7 +19,10 @@ object R {
     }
 
     object dimen {
-        val roadWidth = 3f
+        val roadWidth = 7f
         val gridWidth = 1f
+        val maxParkingSlotSize = 20f
+        val houseSize = 50f
     }
+
 }
