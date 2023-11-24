@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 object R {
     object color{
+        val parkovka = Color (0xFF808080)
         val gridColor = Color (0xFF404040)
         val svetoforSignal = Color (0xFF79B207)
         val haus = Color(0xFFFF00FF)

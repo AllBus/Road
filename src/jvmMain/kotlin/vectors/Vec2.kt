@@ -4,6 +4,7 @@ import kotlin.math.*
 
 data class Vec2(@JvmField val x: Double,@JvmField val y: Double) {
 
+    constructor(x: Int, y: Int): this(x.toDouble(), y.toDouble())
     operator fun plus(other: Vec2): Vec2 {
         return Vec2(x + other.x, y + other.y)
     }

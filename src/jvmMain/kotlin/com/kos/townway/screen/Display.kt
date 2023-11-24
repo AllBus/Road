@@ -30,7 +30,7 @@ import vectors.toOffset
 fun Display() {
     val posX = rememberSaveable("DisplayX") { mutableStateOf(0f) }
     val posY = rememberSaveable("DisplayY") { mutableStateOf(0f) }
-    val displayScale = rememberSaveable("DisplayScale") { mutableStateOf(1f) }
+    val displayScale = rememberSaveable("DisplayScale") { mutableStateOf(2f) }
 
     val gameData = remember { mutableStateOf(createGameData()) }
     val fontResolver = LocalFontFamilyResolver.current
@@ -130,12 +130,34 @@ fun DrawCrosses(drawScope: DrawScope, gameData: MutableState<GameData>) {
 }
 
 fun DrawHouses(drawScope: DrawScope, gameData: MutableState<GameData>){
-    val hauseColor: Color = R.color.haus
+    val houseColor: Color = R.color.haus
+    val parkovkaColor: Color = R.color.parkovka
+
     val styleHause: DrawStyle = Fill
 
-    gameData.value.houses.forEach { houses ->
-        drawScope.drawRect(hauseColor, houses.coord.toOffset()-Offset(25f, 25f), Size(50f, 50f))
+gameData.value.houses.forEach {houses ->
+    drawScope.drawCircle(parkovkaColor, houses.parkovka.radius.toFloat(),houses.coord.toOffset())
+    (1..houses.parkovka.spotNumber).forEach{index->
+        val a = index%(houses.parkovka.spotNumber/4)
+        val b = index%4
+        val d =when (b){
+            0 ->Vec2(-1.0, 0.0)
+            1 ->Vec2(0,-1)
+            2 ->Vec2 (1,0)
+            3 ->Vec2(0,1)
+            else -> Vec2(0,0)
+        }
+
+        drawScope.drawRect(R.color.svetoforSignal, houses.coord.toOffset()-Offset(25f, 25f)+
+                (d*a.toDouble()*houses.parkovka.radius).toOffset() , Size(6f, 6f))
+
     }
+}
+    gameData.value.houses.forEach { houses ->
+        drawScope.drawRect(houseColor, houses.coord.toOffset()-Offset(25f, 25f), Size(50f, 50f))
+    }
+
+
 }
 
 private fun line(p: Path, start: Vec2, end: Vec2) {
